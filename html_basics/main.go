@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"log"
 	"net/http"
 
@@ -9,7 +10,7 @@ import (
 
 func main() {
 	router := gin.Default()
-	router.LoadHTMLGlob("template/*.html")
+	router.LoadHTMLGlob("html_basics/templates/*.html")
 	router.GET("/hello", getHello)
 	router.GET("/greet", getGreet)
 	router.GET("/greet/:name", getGreetName)

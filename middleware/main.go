@@ -22,7 +22,7 @@ var movies = []movie{
 
 func main() {
 	router := gin.New()
-	router.LoadHTMLGlob("templates/*.html")
+	router.LoadHTMLGlob("middleware/templates/*.html")
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	router.Use(middlewareFunc1, middlewareFunc2, middlewareFunc3())
