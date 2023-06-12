@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -48,4 +49,40 @@ func getMovieByID(c *gin.Context) {
 		}
 	}
 	c.IndentedJSON(http.StatusOK, movies[index])
+}
+
+func createMovie(c *gin.Context) {
+	var newMovie movie
+
+	err := c.BindJSON(&newMovie)
+	if err != nil {
+		fmt.Println("err:", err)
+		return
+	}
+	movies = append(movies, newMovie)
+	c.IndentedJSON(http.StatusCreated, movies)
+}
+
+func updateMoviePrice(c *gin.Context) {
+	var index int
+	id := c.Param("id")
+	for k, v := range movies {
+		if id == v.ID {
+			index = k
+		}
+	}
+	movies[index].Price = "9.99"
+	c.IndentedJSON(http.StatusOK, movies)
+}
+
+func deleteMovie(c *gin.Context) {
+	var index int
+	id := c.Param("id")
+	for k, v := range movies {
+		if id == v.ID {
+			index = k
+		}
+	}
+	movies = append(movies[:index], movies[index+1:]...)
+	c.IndentedJSON(http.StatusOK, movies)
 }
