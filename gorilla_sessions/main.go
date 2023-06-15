@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -87,4 +88,15 @@ func loginPOSThandler(ctx *gin.Context) {
 		ctx.HTML(http.StatusUnauthorized, "login.html", gin.H{"message": "check username and password"})
 		return
 	}
+	err = bcrypt.CompareHashAndPassword([]byte(user.pswdHash), []byte(password)) //using bycrypt for hashing password
+	fmt.Println("err from bycrypt:", err)
+	//if hash and password match
+	if err == nil {
+		session, _ := store.Get(ctx.Request, "session")
+		session.Values["user"] = user
+		session.Save(ctx.Request, ctx.Writer)
+		ctx.HTML(http.StatusOK, "loggedin.html", gin.H{"username": user.Username})
+		return
+	}
+	ctx.HTML(http.StatusUnauthorized, "login.hrml", gin.H{"message": "check username and password"}) //handling unauthorized login
 }
