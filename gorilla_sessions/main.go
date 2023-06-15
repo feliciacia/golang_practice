@@ -68,3 +68,23 @@ func auth(ctx *gin.Context) {
 	fmt.Println("middleware done")
 	ctx.Next()
 }
+
+func indexHandler(ctx *gin.Context) {
+	ctx.HTML(http.StatusOK, "index.html", nil)
+}
+
+func loginGEThandler(ctx *gin.Context) {
+	ctx.HTML(http.StatusOK, "login.html", nil)
+}
+
+func loginPOSThandler(ctx *gin.Context) {
+	var user User
+	user.Username := ctx.PostForm("username")
+	password := ctx.PostForm("password")
+	err := user.getUserbyUsername()
+	if err != nil {
+		fmt.Println("error selecting password_hash in db by username, err:", err)
+		ctx.HTML(http.StatusUnauthorized, "login.html", gin.H{"message": "check username and password"})
+		return
+	}
+}
