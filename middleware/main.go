@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,11 +23,16 @@ var movies = []movie{
 }
 
 func main() {
-	router := gin.New()
+	router := gin.Default()
 	router.LoadHTMLGlob("middleware/templates/*.html")
-	router.Use(gin.Logger())
-	router.Use(gin.Recovery())
-	router.Use(middlewareFunc1, middlewareFunc2, middlewareFunc3())
+	router.Use(middlewareFunc1(), middlewareFunc2, middlewareFunc3())
+	//router.Use(StartReqTimeAndFinishReqTimeMiddleware())
+	//router.Use(CheckAuthMiddleware())
+	/*router.GET("/", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{
+			"message": "succeed",
+		})
+	})*/
 	router.GET("/movie", getAllMovies)
 	authRouter := router.Group("/auth", gin.BasicAuth(gin.Accounts{
 		"Joe":   "baseball",
@@ -33,26 +40,47 @@ func main() {
 	}))
 	authRouter.GET("/movie", createMovieForm)
 	authRouter.POST("/movie", createMovie)
-	router.Run(":8000")
+	router.Run(":8080")
 }
 
-func middlewareFunc1(c *gin.Context) {
-	fmt.Println("middlewareFunc1 running")
-
-	c.Next()
+func StartReqTimeAndFinishReqTimeMiddleware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		log.Println("Start at:", time.Now())
+		ctx.Next()
+		log.Println("End at:", time.Now())
+	}
 }
 
-func middlewareFunc2(c *gin.Context) {
+func CheckAuthMiddleware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		token := ctx.GetHeader("Authorization")
+		if token != "secrettoken" {
+			ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+				"error": "You have no authorited token",
+			})
+		}
+		ctx.Next()
+	}
+}
+
+func middlewareFunc1() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		fmt.Println("middlewareFunc1 running")
+		ctx.Next()
+	}
+}
+
+func middlewareFunc2(ctx *gin.Context) {
 	fmt.Println("middlewareFunc2 running")
-	c.Abort()
+	//ctx.Abort()
 	fmt.Println("middlewareFunc2 ending")
-	c.Next()
+	ctx.Next()
 }
 
 func middlewareFunc3() gin.HandlerFunc {
-	return func(c *gin.Context) {
+	return func(ctx *gin.Context) {
 		fmt.Println("middlewareFunc3 running")
-		c.Next()
+		ctx.Next()
 	}
 }
 
