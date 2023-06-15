@@ -80,9 +80,9 @@ func loginGEThandler(ctx *gin.Context) {
 
 func loginPOSThandler(ctx *gin.Context) {
 	var user User
-	user.Username := ctx.PostForm("username")
+	user.Username = ctx.PostForm("username")
 	password := ctx.PostForm("password")
-	err := user.getUserbyUsername()
+	err := user.getUserByUsername()
 	if err != nil {
 		fmt.Println("error selecting password_hash in db by username, err:", err)
 		ctx.HTML(http.StatusUnauthorized, "login.html", gin.H{"message": "check username and password"})
