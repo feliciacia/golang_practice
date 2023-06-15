@@ -100,3 +100,15 @@ func loginPOSThandler(ctx *gin.Context) {
 	}
 	ctx.HTML(http.StatusUnauthorized, "login.hrml", gin.H{"message": "check username and password"}) //handling unauthorized login
 }
+
+func profileHandler(ctx *gin.Context) {
+	session, _ := store.Get(ctx.Request, "session")
+	var user = &User{}            //user information assigned in user value
+	val := session.Values["user"] //store user information in session
+	var ok bool
+	if user, ok = val.(*User); !ok {
+		fmt.Println("was not of type *User")
+		ctx.HTML(http.StatusForbidden, "login.html", nil) //so that other user cant render in the page of user's profile
+		return
+	}
+}
