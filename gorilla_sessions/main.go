@@ -98,17 +98,29 @@ func loginPOSThandler(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "loggedin.html", gin.H{"username": user.Username})
 		return
 	}
-	ctx.HTML(http.StatusUnauthorized, "login.hrml", gin.H{"message": "check username and password"}) //handling unauthorized login
+	ctx.HTML(http.StatusUnauthorized, "login.html", gin.H{"message": "check username and password"}) //handling unauthorized login
 }
 
 func profileHandler(ctx *gin.Context) {
 	session, _ := store.Get(ctx.Request, "session")
-	var user = &User{}            //user information assigned in user value
-	val := session.Values["user"] //store user information in session
+	var user = &User{}            //user informations assigned in user value
+	val := session.Values["user"] //store user informations in session
 	var ok bool
 	if user, ok = val.(*User); !ok {
 		fmt.Println("was not of type *User")
 		ctx.HTML(http.StatusForbidden, "login.html", nil) //so that other user cant render in the page of user's profile
 		return
 	}
+	ctx.HTML(http.StatusOK, "profile.html", gin.H{"user": user})
+}
+
+func (u *User) getUserByUsername() error {
+	stmt := "SELECT * FROM users WHERE username = ?"
+	row := db.QueryRow(stmt, u.Username) //? will be replaced by user's username
+	err := row.Scan(&u.ID, &u.Username, &u.Email, &u.pswdHash, &u.CreatedAt, &u.Active, &u.verHash, &u.timeout)
+	if err != nil {
+		fmt.Println("getUser() error selecting User, err:", err)
+		return err
+	}
+	return nil //successful retrieval will return nil
 }
